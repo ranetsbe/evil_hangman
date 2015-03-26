@@ -50,35 +50,35 @@ def getGuessedWord():
 		guessed.append(" ")
 	return "".join(guessed)
 
-print "EVIL HANGMAN"
-wordSize = int(raw_input("Enter word size: "))
+print("EVIL HANGMAN")
+wordSize = int(input("Enter word size: "))
 dictionary = filterLen(wordSize, list(open("dictionary.txt", 'r').read().split('\n')))
-
-# check dictionary size
-if dictionary:
-	print "Invalid word size, exiting"
-	exit()
 
 # setup letter tracking
 for i in range(0, wordSize):
 	knownLetters[i] = '_'
-for c in string.lowercase:
+for c in string.ascii_lowercase:
 	guessedLetters[c] = 0
 
-numGuessed = 0
+maxGuesses = 10
+gameWon = True
+guessCount = 0
+correctGuesses = 0
 
-while numGuessed < wordSize:
+while correctGuesses < wordSize:
 	# show guessed letters
-	print "Secret word: " + getGuessedWord
+	print("Secret word: " + getGuessedWord())
 	# get letter
-	letter = raw_input("Guess a letter, if you dare: ")
+	print("Guess a letter, if you dare...")
+	letter = input("(" + str(maxGuesses - guessCount) + " guesses remaining): ")
 	while 1:
 		if (len(letter) > 1):
-			letter = raw_input("That's not a letter you peasant!\nTry again: ")
+			letter = input("That's not a letter, peasant!\nTry again: ")
 		elif guessedLetters[letter] == 1:
-			letter = raw_input("You already guessed that letter you fool!\nTry again: ")
+			letter = input("You already guessed that letter you fool!\nTry again: ")
 		else:
 			break
+	guessCount += 1
 
 	# enter letter in guessedLetters
 	guessedLetters[letter] = 1
@@ -87,15 +87,24 @@ while numGuessed < wordSize:
 		newDictionary = filterChar(i, letter, newDictionary)
 	if newDictionary:
 		# incorrect / dodged guess
-		print "HA! WRONG! You will never defeat me!!\n"
+		print("HA! WRONG! You will never defeat me!!\n")
 		dictionary = newDictionary
-		for w in dictionary:
-			print(w)
 	else:
 		# correct guess
-		print "Impossible!  Nothing more than luck...\n"
+		print("Impossible!  Nothing more than luck...\n")
 		letterPositions = findLetters(letter, dictionary[0])
 		dictionary = filterWords(letterPositions, letter, dictionary)
 		for i in letterPositions:
 			knownLetters[i] = letter
-		numGuessed += len(letterPositions)
+		correctGuesses += len(letterPositions)
+	if guessCount >= maxGuesses:
+		gameWon = False
+		break
+
+if gameWon:
+	print("I.. I can't... believe.. you won..  You must be cheating!!!")
+else:
+	print("You're out of guesses, fool.  The word was \"" + dictionary[0] + "\".")
+	print("It's time for you to die..")
+	acceptFate = input("(Accept your fate): ")
+	print("You're dead.")
